@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pour Madame la Prof</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&family=Courier+Prime:wght@400;700&display=swap">
+<style>
+/* Layout : une enveloppe à ouvrir, puis une seule carte au centre qui change d'étape ; la fin est un ticket de convocation */
+:root{
+  --wine:#6e1f3a;
+  --wine-dark:#4a1327;
+  --blush:#f7dfe4;
+  --rose:#e8a5b5;
+  --gold:#c9a24b;
+  --cream:#fff7ef;
+  --ink:#3a1622;
+  --soft:#8a4a5c;
+  --font-script:"Fredoka","Nunito","Trebuchet MS",Arial,sans-serif;
+  --font-body:"Nunito","Segoe UI",Roboto,Arial,sans-serif;
+  --font-type:"Courier Prime","Courier New",Courier,monospace;
+  color-scheme:light;
+}
+*{ box-sizing:border-box; }
+html, body{ height:100%; }
+body{
+  margin:0;
+  font-family:var(--font-body);
+  color:var(--ink);
+  background:var(--blush);
+  background-image:radial-gradient(circle at 50% 0%, var(--blush) 0%, #f4c9d3 45%, var(--wine) 130%);
+  overflow:hidden;
+}
+
+.heart-trail{ position:fixed; pointer-events:none; font-size:1rem; z-index:50; color:var(--wine); animation:trailFade 1s ease-out forwards; }
+@keyframes trailFade{ 0%{ opacity:.9; transform:translateY(0) scale(1); } 100%{ opacity:0; transform:translateY(-30px) scale(.5); } }
+.sky{ position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
+.doodle{ position:absolute; opacity:.45; animation:float 10s ease-in-out infinite; }
+@keyframes float{ 0%,100%{ transform:translateY(0) rotate(0deg); } 50%{ transform:translateY(-26px) rotate(10deg); } }
+
+.stage{
+  position:relative; z-index:1; height:100%;
+  display:flex; align-items:center; justify-content:center;
+  padding-block:16px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* Enveloppe */
+.envelope-wrap{ text-align:center; cursor:pointer; background:none; border:0; padding:0; font:inherit; color:inherit; }
+.envelope{ width:220px; height:150px; margin:0 auto 26px; position:relative; filter:drop-shadow(0 18px 30px rgba(74,19,39,.35)); transition:transform .25s ease; }
+.envelope-wrap:hover .envelope{ transform:translateY(-4px) scale(1.02); }
+.envelope-body{ position:absolute; inset:0; background:var(--cream); border-radius:8px; border:2px solid var(--gold); }
+.envelope-flap{ position:absolute; top:0; left:0; right:0; height:78px; background:var(--rose); clip-path:polygon(0 0, 50% 62%, 100% 0); border-radius:8px 8px 0 0; transform-origin:top; transition:transform .6s ease; z-index:2; }
+.seal{ position:absolute; top:46%; left:50%; transform:translate(-50%,-50%); width:42px; height:42px; background:var(--wine); border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--gold); font-size:1.3rem; z-index:3; box-shadow:0 4px 10px rgba(0,0,0,.25); }
+.envelope-hint{ font-family:var(--font-script); font-weight:600; font-size:1.25rem; color:var(--wine-dark); }
+.envelope-wrap.opened .envelope-flap{ transform:rotateX(180deg); }
+.envelope-wrap.opened .envelope{ animation:envAway .5s ease forwards .35s; }
+.envelope-wrap.opened .envelope-hint{ opacity:0; }
+@keyframes envAway{ to{ opacity:0; transform:scale(.8) translateY(-20px); } }
+
+/* Carte */
+.card{
+  max-width:460px; width:calc(100% - 32px); max-height:94%;
+  overflow-y:auto; overflow-x:hidden;
+  text-align:center; padding:26px 20px 22px;
+  background:linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,247,239,.88));
+  border-radius:20px; border:1px solid rgba(201,162,75,.5);
+  box-shadow:0 25px 60px rgba(74,19,39,.25);
+  position:absolute; top:50%; left:50%;
+  opacity:0; transform:translate(-50%,-50%) translateY(30px) scale(.96);
+  pointer-events:none; transition:opacity .7s ease, transform .7s ease;
+}
+.card.show{ opacity:1; transform:translate(-50%,-50%) translateY(0) scale(1); pointer-events:auto; }
+
+.ornament{ font-size:1.75rem; color:var(--gold); margin-bottom:6px; }
+h1{ font-family:var(--font-script); font-weight:600; font-size:1.6rem; line-height:1.2; margin:4px 0 10px; color:var(--wine-dark); text-wrap:balance; }
+p.sub{ font-size:1rem; line-height:1.5; margin:0 0 18px; color:#6b3347; }
+
+.buttons{ position:relative; display:flex; justify-content:center; align-items:center; gap:14px; flex-wrap:wrap; min-height:96px; }
+button, .btn-link{
+  font-family:var(--font-body); font-weight:700; font-size:1rem; letter-spacing:0;
+  padding:11px 24px; border-radius:999px; border:none; cursor:pointer;
+  transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+button:focus-visible, .btn-link:focus-visible, textarea:focus-visible, input:focus-visible{ outline:3px solid var(--gold); outline-offset:3px; }
+#yes{ background:var(--wine); color:var(--cream); box-shadow:0 12px 24px rgba(110,31,58,.4); }
+#yes:hover{ transform:scale(1.06); box-shadow:0 16px 30px rgba(110,31,58,.5); }
+#no{ background:transparent; color:var(--wine-dark); border:1.5px solid var(--rose); position:relative; }
+.excuse{ margin-top:12px; font-size:1.05rem; color:#9a5d72; min-height:22px; font-style:italic; }
+.later-link{ margin-top:10px; }
+
+/* Choix */
+.quiz-progress{ display:flex; justify-content:center; gap:8px; margin-bottom:22px; }
+.quiz-progress span{ width:8px; height:8px; border-radius:50%; background:var(--rose); opacity:.4; transition:opacity .3s ease, transform .3s ease; }
+.quiz-progress span.done{ opacity:1; background:var(--wine); transform:scale(1.15); }
+.quiz-question{ font-family:var(--font-script); font-weight:600; font-size:1.35rem; color:var(--wine-dark); margin:0 0 4px; line-height:1.25; text-wrap:balance; }
+.tap-hint{ margin:0 0 14px; font-size:.9rem; color:var(--soft); }
+.guide{
+  margin:14px auto 0; display:inline-flex; flex-direction:column; align-items:center; gap:2px;
+  font-family:var(--font-script); font-weight:600; font-size:1.05rem; color:var(--wine);
+}
+.guide .arrow{ font-size:1.6rem; line-height:1; animation:nudge 1s ease-in-out infinite; }
+@keyframes nudge{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(7px); } }
+.quiz-options{ display:flex; justify-content:center; gap:10px; flex-wrap:wrap; }
+.quiz-options button{ background:var(--cream); color:var(--wine-dark); border:1.5px solid var(--gold); font-size:.98rem; padding:10px 16px; }
+.quiz-options button:hover{ background:var(--rose); }
+.quiz-options button[aria-pressed="true"]{ background:var(--wine); color:var(--cream); border-color:var(--wine); }
+.quiz-input{ display:block; margin:14px auto 0; width:100%; max-width:300px; font-family:var(--font-body); font-size:1.08rem; color:var(--ink); padding:9px 14px; border-radius:12px; border:1.5px solid var(--gold); background:rgba(255,255,255,.75); }
+.quiz-reply{ min-height:24px; font-size:1.08rem; font-style:italic; color:var(--soft); margin:14px 0 4px; }
+.quiz-next{ margin-top:12px; background:var(--wine); color:var(--cream); }
+.menu{ display:grid; gap:18px; margin-top:4px; }
+.menu-group{ display:grid; gap:8px; justify-items:center; }
+.menu-label{ margin:0; font-family:var(--font-script); font-weight:600; font-size:1.1rem; color:var(--wine); }
+.menu-options{ display:flex; justify-content:center; gap:8px; flex-wrap:wrap; }
+.menu-options button{ background:var(--cream); color:var(--wine-dark); border:1.5px solid var(--gold); font-size:.95rem; padding:9px 14px; }
+.menu-options button:hover{ background:var(--rose); }
+.menu-options button[aria-pressed="true"]{ background:var(--wine); color:var(--cream); border-color:var(--wine); }
+.menu-input{ margin-top:2px; }
+
+/* Le mot secret */
+.bangala{ margin:16px auto 4px; display:grid; gap:8px; justify-items:center; }
+.bangala-hint{ margin:0; font-size:1rem; color:var(--soft); }
+.bangala-btn{
+  font-family:var(--font-script); font-weight:700; font-size:1.9rem; line-height:1;
+  padding:12px 30px 14px; background:var(--wine); color:var(--cream);
+  border:2px solid var(--gold); box-shadow:0 14px 28px rgba(110,31,58,.4);
+  transform:rotate(-3deg); animation:wiggle 1.8s ease-in-out infinite;
+}
+.bangala-btn:hover{ transform:rotate(-3deg) scale(1.07); }
+.bangala-btn.tapped{ animation:none; background:var(--gold); color:var(--wine-dark); border-color:var(--wine); }
+@keyframes wiggle{
+  0%,100%{ transform:rotate(-3deg) scale(1); }
+  50%{ transform:rotate(3deg) scale(1.08); }
+}
+.bangala-msg{
+  margin:4px 0 0; font-family:var(--font-script); font-weight:600; font-size:1.15rem; line-height:1.35; color:var(--wine);
+  animation:popIn .4s cubic-bezier(.2,1.6,.4,1) both;
+}
+@keyframes popIn{ from{ opacity:0; transform:scale(.6); } to{ opacity:1; transform:scale(1); } }
+.burst{ position:fixed; pointer-events:none; z-index:60; font-size:1.4rem; animation:burst .9s ease-out forwards; }
+@keyframes burst{ to{ opacity:0; transform:translate(var(--dx), var(--dy)) scale(.6); } }
+
+/* Ticket de convocation */
+.ticket{
+  margin:16px auto 0; max-width:360px; text-align:left;
+  background:var(--cream); border:1.5px solid var(--gold); border-radius:14px;
+  position:relative; overflow:hidden;
+  box-shadow:0 14px 30px rgba(74,19,39,.18);
+}
+.ticket::before, .ticket::after{
+  content:""; position:absolute; top:calc(100% - 92px); width:22px; height:22px; border-radius:50%;
+  background:#f4d3db; border:1.5px solid var(--gold); transform:translateY(-50%);
+}
+.ticket::before{ left:-12px; }
+.ticket::after{ right:-12px; }
+.ticket-head{
+  display:flex; justify-content:space-between; align-items:baseline; gap:10px;
+  background:var(--wine); color:var(--cream); padding:10px 16px;
+  font-family:var(--font-type); font-size:.78rem; letter-spacing:.14em; text-transform:uppercase;
+}
+.ticket-body{ padding:14px 16px 16px; display:grid; gap:8px; }
+.t-row{ display:grid; grid-template-columns:118px minmax(0,1fr); gap:10px; align-items:baseline; }
+.t-label{ font-family:var(--font-type); font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:var(--soft); }
+.t-val{ font-size:1.08rem; font-weight:600; color:var(--ink); overflow-wrap:anywhere; line-height:1.3; }
+.t-salle{ font-family:var(--font-script); font-size:1.25rem; color:var(--wine); font-weight:700; }
+.ticket-stub{
+  border-top:2px dashed var(--gold); padding:12px 16px 14px; height:92px;
+  display:grid; gap:6px; justify-items:center; align-content:center;
+}
+.barcode{ display:flex; align-items:stretch; height:40px; gap:2px; }
+.barcode i{ display:block; background:var(--ink); }
+.ticket-num{ font-family:var(--font-type); font-size:.72rem; letter-spacing:.2em; color:var(--soft); }
+
+.note-title{ font-family:var(--font-script); font-weight:600; font-size:1.05rem; color:var(--wine); margin:18px 0 6px; }
+textarea{ width:100%; max-width:380px; font-family:var(--font-body); font-size:1.05rem; padding:8px 12px; border-radius:12px; border:1.5px solid var(--gold); background:rgba(255,255,255,.75); color:var(--ink); resize:vertical; }
+.btn-link{ display:inline-block; margin-top:12px; background:var(--wine); color:var(--cream); text-decoration:none; box-shadow:0 12px 24px rgba(110,31,58,.35); }
+.btn-link:hover{ transform:scale(1.04); }
+.copy-row{ margin:8px 0 0; font-size:.95rem; color:var(--soft); }
+.copy-row button{ background:none; padding:0; font-size:.95rem; font-weight:500; color:var(--wine); text-decoration:underline; }
+.success .ornament{ font-size:1.95rem; animation:pulse 1.4s ease-in-out infinite; }
+@keyframes pulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.15); } }
+footer{ margin-top:14px; font-family:var(--font-script); font-weight:600; font-size:1.05rem; color:var(--wine); }
+.signature{ font-family:var(--font-script); font-weight:700; font-size:1.6rem; color:var(--wine-dark); display:inline-block; overflow:hidden; white-space:nowrap; max-width:0; vertical-align:bottom; }
+.success.show-sign .signature{ animation:writeSignature 1.4s ease forwards .5s; }
+@keyframes writeSignature{ to{ max-width:220px; } }
+
+.confetti{ position:fixed; top:-10px; font-size:1.3rem; z-index:5; animation:fall linear forwards; pointer-events:none; }
+@keyframes fall{ to{ transform:translateY(110vh) rotate(360deg); opacity:.15; } }
+
+@media (prefers-reduced-motion: reduce){
+  .doodle, .success .ornament, .heart-trail, .confetti, .bangala-btn, .burst, .guide .arrow{ animation:none !important; }
+  .signature{ max-width:none; }
+  .card, .envelope-flap{ transition:none; }
+}
+[hidden]{ display:none !important; }
+</style>
+</head>
+<body>
+<div class="sky" id="sky"></div>
+
+<div class="stage">
+  <button class="envelope-wrap" id="envelopeWrap" type="button" aria-label="Ouvrir l'enveloppe">
+    <div class="envelope">
+      <div class="envelope-body"></div>
+      <div class="envelope-flap"></div>
+      <div class="seal">♥</div>
+    </div>
+    <div class="envelope-hint">Touche pour ouvrir, prof</div>
+  </button>
+
+  <div class="card" id="card">
+    <!-- Invitation -->
+    <div id="question">
+      <div class="ornament">❦</div>
+      <h1>Madame la Prof, ça te dit de me donner ma retenue… en vrai&nbsp;?</h1>
+      <p class="sub">Bon… j'avais envie de faire les choses un peu autrement cette fois 😏 Alors j'ai préparé un petit truc pour toi. C'est toi qui choisis tout, et normalement… tu devrais sourire en arrivant au bout 👀</p>
+      <div class="buttons" id="buttons">
+        <button id="yes" type="button">Oui, avec plaisir ♥</button>
+        <button id="no" type="button">Hésitation…</button>
+      </div>
+      <div class="excuse" id="excuse" aria-live="polite"></div>
+      <a class="btn-link later-link" id="laterLink" href="https://wa.me/22382869391" target="_blank" rel="noopener" hidden>Le dire à HAM</a>
+    </div>
+
+    <!-- Choix -->
+    <div id="quiz" hidden>
+      <div class="quiz-progress" id="quizProgress"></div>
+      <div class="quiz-question" id="quizQuestion"></div>
+      <p class="tap-hint" id="tapHint">Touche ta réponse 👇</p>
+      <div class="quiz-options" id="quizOptions" role="group" aria-labelledby="quizQuestion"></div>
+      <input class="quiz-input" id="quizInput" type="text" aria-label="Ta réponse" hidden>
+      <div class="menu" id="menu" hidden></div>
+      <div class="quiz-reply" id="quizReply" aria-live="polite"></div>
+      <div><div class="guide" id="guide" hidden><span>Clique ici pour continuer</span><span class="arrow" aria-hidden="true">👇</span></div></div>
+      <button class="quiz-next" id="quizNext" type="button" hidden>Suite ♥</button>
+    </div>
+
+    <!-- Ticket -->
+    <div class="success" id="success" hidden>
+      <div class="ornament">✧ ♥ ✧</div>
+      <h1>Retenue acceptée&nbsp;!</h1>
+      <p class="sub">Voilà ta convocation, prof. Garde-la bien 😏</p>
+
+      <div class="ticket" id="ticket">
+        <div class="ticket-head"><span>Convocation</span><span>Retenue n°1</span></div>
+        <div class="ticket-body">
+          <div class="t-row" id="rowSalle" hidden><span class="t-label">Salle</span><span class="t-val t-salle">12 🔒</span></div>
+          <div class="t-row"><span class="t-label">Quand</span><span class="t-val" id="tQuand"></span></div>
+          <div class="t-row"><span class="t-label">Où</span><span class="t-val" id="tOu"></span></div>
+          <div class="t-row" id="rowSnack" hidden><span class="t-label">À grignoter</span><span class="t-val" id="tSnack"></span></div>
+          <div class="t-row" id="rowActivity" hidden><span class="t-label">Activité</span><span class="t-val" id="tActivity"></span></div>
+          <div class="t-row" id="rowFun" hidden><span class="t-label">Divertissement</span><span class="t-val" id="tFun"></span></div>
+          <div class="t-row"><span class="t-label">Admis</span><span class="t-val">2 personnes</span></div>
+        </div>
+        <div class="ticket-stub">
+          <div class="barcode" id="barcode" aria-hidden="true"></div>
+          <div class="ticket-num">RET-0001 · S12 · HAM</div>
+        </div>
+      </div>
+
+      <p class="note-title">Un mot à ajouter, avant d'envoyer&nbsp;?</p>
+      <textarea id="personalNote" rows="2" placeholder="Écris ce que tu veux ici… (facultatif)" aria-label="Un mot pour HAM, facultatif"></textarea>
+      <div>
+        <div class="guide"><span>Clique ici pour m'envoyer ta réponse</span><span class="arrow" aria-hidden="true">👇</span></div>
+      </div>
+      <div>
+        <a class="btn-link" id="sendLink" href="https://wa.me/22382869391" target="_blank" rel="noopener">Envoyer ma réponse ♥</a>
+      </div>
+      <p class="copy-row">Le bouton ne marche pas&nbsp;? <button type="button" id="copyBtn">Copier le message</button></p>
+      <p class="copy-row" id="copyStatus" aria-live="polite"></p>
+      <textarea id="msgFallback" rows="7" readonly aria-label="Message à envoyer à HAM" hidden></textarea>
+      <footer>À très vite, prof ♥</footer>
+      <div><span class="signature">HAM</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var PHONE = "22382869391";
+  var $ = function(id){ return document.getElementById(id); };
+  var reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* Cœurs qui flottent en fond */
+  var doodles = ["♥","❥","✦","❦"];
+  var sky = $("sky");
+  for (var i = 0; i < 14; i++) {
+    var d = document.createElement("div");
+    d.className = "doodle";
+    d.textContent = doodles[Math.floor(Math.random() * doodles.length)];
+    d.style.left = Math.random() * 92 + "vw";
+    d.style.top = Math.random() * 92 + "vh";
+    d.style.animationDelay = (Math.random() * 6) + "s";
+    d.style.fontSize = (1.1 + Math.random() * 1.8) + "rem";
+    d.style.color = Math.random() > .5 ? "#6e1f3a" : "#c9a24b";
+    sky.appendChild(d);
+  }
+
+  /* Traînée de cœurs */
+  var lastTrail = 0;
+  function spawnHeart(x, y){
+    var now = Date.now();
+    if (now - lastTrail < 60) return;
+    lastTrail = now;
+    var h = document.createElement("div");
+    h.className = "heart-trail";
+    h.textContent = "♥";
+    h.style.left = x + "px";
+    h.style.top = y + "px";
+    document.body.appendChild(h);
+    setTimeout(function(){ h.remove(); }, 1000);
+  }
+  window.addEventListener("mousemove", function(e){ spawnHeart(e.clientX, e.clientY); });
+  window.addEventListener("touchmove", function(e){ var t = e.touches[0]; if (t) spawnHeart(t.clientX, t.clientY); }, { passive:true });
+
+  /* Petits sons */
+  function ctx(){ if (!window._audioCtx) window._audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return window._audioCtx; }
+  function tone(freq, start, dur, c){
+    var o = c.createOscillator(), g = c.createGain();
+    o.type = "sine"; o.frequency.value = freq;
+    var t0 = c.currentTime + start;
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(.16, t0 + .02);
+    g.gain.exponentialRampToValueAtTime(.001, t0 + dur);
+    o.connect(g).connect(c.destination);
+    o.start(t0); o.stop(t0 + dur + .05);
+  }
+  function chimeOpen(){ try { var c = ctx(); tone(523.25, 0, .25, c); tone(659.25, .15, .3, c); } catch(e){} }
+  function chimeYes(){ try { var c = ctx(); tone(523.25, 0, .18, c); tone(659.25, .12, .18, c); tone(784, .24, .35, c); } catch(e){} }
+  function chimeCheeky(){ try { var c = ctx(); tone(784, 0, .12, c); tone(622.25, .1, .12, c); tone(880, .2, .3, c); } catch(e){} }
+
+  function waLink(msg){ return "https://wa.me/" + PHONE + "?text=" + encodeURIComponent(msg); }
+
+  /* Enveloppe */
+  $("envelopeWrap").addEventListener("click", function(){
+    var w = $("envelopeWrap");
+    if (w.classList.contains("opened")) return;
+    w.classList.add("opened");
+    chimeOpen();
+    setTimeout(function(){ $("card").classList.add("show"); w.hidden = true; }, 700);
+  });
+
+  /* Bouton Hésitation */
+  var noBtn = $("no"), excuseEl = $("excuse");
+  var excuses = [
+    "Prends ton temps… mais l'élève, lui, n'attend pas.",
+    "Ce bouton est timide, regarde comme il tremble.",
+    "Plus tu hésites, plus je suis sûr de vouloir cette retenue.",
+    "Ce bouton a demandé à sortir. Permission refusée 😏",
+    "Prof, tu sais très bien que tu vas dire oui 😌"
+  ];
+  var dodgeCount = 0;
+  noBtn.addEventListener("click", function(){
+    if (dodgeCount >= excuses.length) {
+      excuseEl.textContent = "D'accord, prof. L'élève attendra… mais il n'oublie jamais une retenue 😌";
+      $("laterLink").href = waLink("💌\n\nLa retenue, c'est pas encore pour maintenant 😏\n\n— Ta prof");
+      $("laterLink").hidden = false;
+      noBtn.hidden = true;
+      return;
+    }
+    var stage = $("buttons");
+    var maxX = Math.max(0, stage.clientWidth - noBtn.clientWidth - 10);
+    var maxY = Math.max(0, stage.clientHeight - noBtn.clientHeight - 10);
+    noBtn.style.transform = "translate(" + (Math.random() * maxX - maxX / 2) + "px," + (Math.random() * maxY - maxY / 2) + "px)";
+    excuseEl.textContent = excuses[dodgeCount];
+    dodgeCount++;
+    if (dodgeCount === excuses.length) { noBtn.style.transform = ""; noBtn.textContent = "Vraiment pas encore"; }
+  });
+
+  /* Les choix de la prof */
+  var steps = [
+    { key:"jour", question:"Quel jour pour ta retenue ?", options:[
+      { label:"Vendredi", reply:"Vendredi, c'est noté 📅" },
+      { label:"Samedi", reply:"Samedi, parfait 📅" },
+      { label:"Dimanche", reply:"Va pour dimanche 📅" },
+      { label:"Un autre jour", reply:"Dis-moi lequel 👇", input:"Ex. : mercredi prochain" }
+    ]},
+    { key:"moment", question:"Plutôt à quel moment ?", options:[
+      { label:"L'après-midi", reply:"L'après-midi, c'est noté ☀️" },
+      { label:"En début de soirée", reply:"Début de soirée, bon choix 🌇" },
+      { label:"Le soir", reply:"Le soir… intéressant 😏" },
+      { label:"Une heure précise", reply:"Dis-moi l'heure 👇", input:"Ex. : 19h30" }
+    ]},
+    { key:"type", question:"Ta retenue, tu la donnes où ?", options:[
+      { label:"Salle 12 : juste toi et moi 🔒", value:"salle", reply:"Salle 12 réservée 🔒" },
+      { label:"En plein air 🌬️", value:"air", reply:"Grand air, c'est noté 🌬️" }
+    ]},
+    { key:"lieu" },
+    { key:"menu" }
+  ];
+  var menuGroups = [
+    { key:"snack", label:"À grignoter", options:[
+      { label:"Popcorn 🍿", value:"Popcorn" },
+      { label:"Chocolat 🍫", value:"Chocolat" },
+      { label:"Autre (à préciser)", input:"Ex. : brochettes, fataya…" }
+    ]},
+    { key:"activity", label:"Activité", options:[
+      { label:"Cinéma 🎬", value:"Cinéma" },
+      { label:"Action ou vérité 🎲", value:"Action ou vérité" }
+    ]},
+    { key:"fun", label:"Divertissement", options:[
+      { label:"Bangala 😏", value:"Bangala", burst:true },
+      { label:"Autre (à préciser)", input:"Ton idée, prof" }
+    ]}
+  ];
+  var lieux = {
+    salle: { question:"La salle 12, elle se trouve où ?", options:[
+      { label:"Chez moi ou en privé 🔒", value:"Chez moi ou en privé", fun:true, reply:"Je prépare tout, tu n'as qu'à venir 😏" },
+      { label:"Chez la prof 😏", value:"Chez la prof", fun:true, reply:"Invitation acceptée d'avance 😌" },
+      { label:"Autre idée", reply:"Je t'écoute 👇", input:"Ton idée, prof", fun:true }
+    ]},
+    air: { question:"Où exactement ?", options:[
+      { label:"Au bord du fleuve 🌊", value:"Une balade au bord du fleuve", reply:"Le fleuve, bon choix 🌊" },
+      { label:"Une balade à moto 🏍️", value:"Une balade à moto", reply:"Accroche-toi bien 😏" },
+      { label:"Autre idée", reply:"Je t'écoute 👇", input:"Ton idée, prof" }
+    ]}
+  };
+
+  var current = 0, answers = {}, chosen = null;
+  var input = $("quizInput"), nextBtn = $("quizNext");
+
+  function totalSteps(){ return answers.lieuFun === false ? steps.length - 1 : steps.length; }
+  function buildProgress(){
+    var el = $("quizProgress");
+    el.innerHTML = "";
+    for (var i = 0; i < totalSteps(); i++) {
+      var s = document.createElement("span");
+      if (i < current) s.classList.add("done");
+      el.appendChild(s);
+    }
+  }
+  function stepData(){
+    var s = steps[current];
+    if (s.key === "lieu") return { key:"lieu", question:lieux[answers.type].question, options:lieux[answers.type].options };
+    return s;
+  }
+
+  function renderStep(){
+    chosen = null;
+    var s = stepData();
+    $("quizQuestion").textContent = s.question;
+    $("quizReply").textContent = "";
+    setNext(false);
+    input.hidden = true;
+    input.value = "";
+    buildProgress();
+    var box = $("quizOptions");
+    box.innerHTML = "";
+    if (s.key === "menu") { renderMenu(); return; }
+    $("menu").hidden = true;
+    box.hidden = false;
+    $("tapHint").textContent = "Touche ta réponse 👇";
+    s.options.forEach(function(opt){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = opt.label;
+      b.setAttribute("aria-pressed", "false");
+      b.addEventListener("click", function(){ select(opt, b); });
+      box.appendChild(b);
+    });
+  }
+
+  /* Écran à trois parties : grignotage, activité, divertissement */
+  var menuPick = {};
+  function renderMenu(){
+    $("quizQuestion").textContent = "Compose ta retenue, prof 🎬";
+    $("tapHint").textContent = "Choisis une réponse dans chaque partie 👇";
+    $("quizOptions").hidden = true;
+    var menu = $("menu");
+    menu.hidden = false;
+    menu.innerHTML = "";
+    menuPick = {};
+    menuGroups.forEach(function(g){
+      var wrap = document.createElement("div");
+      wrap.className = "menu-group";
+      var lab = document.createElement("p");
+      lab.className = "menu-label";
+      lab.textContent = g.label;
+      var row = document.createElement("div");
+      row.className = "menu-options";
+      row.setAttribute("role", "group");
+      row.setAttribute("aria-label", g.label);
+      var field = document.createElement("input");
+      field.type = "text";
+      field.className = "quiz-input menu-input";
+      field.hidden = true;
+      field.setAttribute("aria-label", g.label + " : précise ton choix");
+      field.addEventListener("input", checkMenu);
+      g.options.forEach(function(o){
+        var b = document.createElement("button");
+        b.type = "button";
+        b.textContent = o.label;
+        b.setAttribute("aria-pressed", "false");
+        b.addEventListener("click", function(){
+          row.querySelectorAll("button").forEach(function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+          menuPick[g.key] = { opt:o, field:field };
+          if (o.input) { field.placeholder = o.input; field.hidden = false; field.focus(); }
+          else { field.hidden = true; }
+          if (o.burst) burst(b);
+          checkMenu();
+        });
+        row.appendChild(b);
+      });
+      wrap.appendChild(lab);
+      wrap.appendChild(row);
+      wrap.appendChild(field);
+      menu.appendChild(wrap);
+    });
+  }
+  function menuValue(key){
+    var p = menuPick[key];
+    if (!p) return "";
+    return p.opt.input ? p.field.value.trim() : p.opt.value;
+  }
+  function checkMenu(){
+    var done = menuGroups.every(function(g){ return !!menuValue(g.key); });
+    var reply = "";
+    if (done) reply = menuValue("fun") === "Bangala" ? "Programme validé… la prof sait ce qu'elle veut 😏" : "Programme validé, je m'occupe de tout 😌";
+    $("quizReply").textContent = reply;
+    var dots = document.querySelectorAll("#quizProgress span");
+    if (dots[current]) dots[current].classList.toggle("done", done);
+    setNext(done);
+  }
+
+  function select(opt, b){
+    chosen = opt;
+    document.querySelectorAll("#quizOptions button").forEach(function(o){ o.setAttribute("aria-pressed", o === b ? "true" : "false"); });
+    $("quizReply").textContent = opt.reply;
+    var dots = document.querySelectorAll("#quizProgress span");
+    if (dots[current]) dots[current].classList.add("done");
+
+    if (opt.burst) burst(b);
+
+    if (opt.input) {
+      input.placeholder = opt.input;
+      input.hidden = false;
+      input.focus();
+      setNext(!!input.value.trim());
+    } else {
+      input.hidden = true;
+      setNext(true);
+    }
+  }
+  function setNext(on){
+    nextBtn.hidden = !on;
+    $("guide").hidden = !on;
+  }
+  input.addEventListener("input", function(){ if (chosen && chosen.input) setNext(!!input.value.trim()); });
+  input.addEventListener("keydown", function(e){ if (e.key === "Enter" && !nextBtn.hidden) nextBtn.click(); });
+
+  /* Petite explosion d'emojis sur un choix */
+  function burst(btn){
+    chimeCheeky();
+    if (reduceMotion) return;
+    var r = btn.getBoundingClientRect();
+    var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    var em = ["🙈","😏","🔒","♥","😂"];
+    for (var i = 0; i < 16; i++) {
+      var p = document.createElement("div");
+      p.className = "burst";
+      p.textContent = em[i % em.length];
+      var a = (Math.PI * 2 * i) / 16;
+      var dist = 70 + Math.random() * 50;
+      p.style.left = cx + "px";
+      p.style.top = cy + "px";
+      p.style.setProperty("--dx", Math.cos(a) * dist + "px");
+      p.style.setProperty("--dy", Math.sin(a) * dist + "px");
+      document.body.appendChild(p);
+      (function(el){ setTimeout(function(){ el.remove(); }, 950); })(p);
+    }
+  }
+
+  nextBtn.addEventListener("click", function(){
+    var key = steps[current].key;
+    if (key === "menu") {
+      menuGroups.forEach(function(g){ answers[g.key] = menuValue(g.key); });
+      finish();
+      return;
+    }
+    if (!chosen) return;
+    answers[key] = chosen.input ? input.value.trim() : (chosen.value || chosen.label);
+    answers[key + "Custom"] = !!chosen.input;
+    if (key === "lieu") answers.lieuFun = !!chosen.fun;
+    if (key === "lieu" && !chosen.fun) { finish(); return; }
+    if (current < steps.length - 1) { current++; renderStep(); }
+    else { finish(); }
+  });
+
+  $("yes").addEventListener("click", function(){
+    chimeYes();
+    $("question").hidden = true;
+    $("quiz").hidden = false;
+    current = 0; answers = {};
+    renderStep();
+  });
+
+  /* Ticket */
+  function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+  function low(s){ return s.charAt(0).toLowerCase() + s.slice(1); }
+  var quand = "", ou = "";
+
+  function buildBarcode(){
+    var bc = $("barcode");
+    bc.innerHTML = "";
+    for (var i = 0; i < 34; i++) {
+      var bar = document.createElement("i");
+      bar.style.width = (Math.random() > .6 ? 3 : 1) + "px";
+      bc.appendChild(bar);
+    }
+  }
+
+  function buildMessage(){
+    var note = $("personalNote").value.trim();
+    var msg = "💌\n\nJ'accepte la retenue ♥\n\n🎟️ Convocation · Retenue n°1\n";
+    if (answers.type === "salle") msg += "Salle : 12 🔒\n";
+    msg += "Quand : " + quand + "\nOù : " + ou + "\n";
+    if (answers.lieuFun) {
+      if (answers.snack) msg += "À grignoter : " + answers.snack + "\n";
+      if (answers.activity) msg += "Activité : " + answers.activity + "\n";
+      if (answers.fun) msg += "Divertissement : " + answers.fun + "\n";
+    }
+    msg += "Admis : 2 personnes";
+    if (note) msg += "\n\n" + note;
+    msg += "\n\nÀ très vite ♥\n— Ta prof";
+    return msg;
+  }
+  function refreshLink(){
+    var msg = buildMessage();
+    $("sendLink").href = waLink(msg);
+    $("msgFallback").value = msg;
+  }
+
+  function finish(){
+    var moment = answers.momentCustom ? "vers " + answers.moment : low(answers.moment);
+    quand = cap(answers.jour) + ", " + moment;
+    ou = answers.lieu;
+    $("tQuand").textContent = quand;
+    $("tOu").textContent = ou;
+    $("rowSalle").hidden = answers.type !== "salle";
+    [["snack","rowSnack","tSnack"],["activity","rowActivity","tActivity"],["fun","rowFun","tFun"]].forEach(function(r){
+      var v = answers.lieuFun ? (answers[r[0]] || "") : "";
+      $(r[2]).textContent = v;
+      $(r[1]).hidden = !v;
+    });
+    buildBarcode();
+    refreshLink();
+    $("quiz").hidden = true;
+    $("success").hidden = false;
+    $("success").classList.add("show-sign");
+    $("card").scrollTop = 0;
+    chimeYes();
+    confetti();
+  }
+  $("personalNote").addEventListener("input", refreshLink);
+
+  $("copyBtn").addEventListener("click", function(){
+    var area = $("msgFallback"), status = $("copyStatus");
+    var ok = function(){ status.textContent = "Message copié. Colle-le dans ta discussion avec HAM."; };
+    var fallback = function(){
+      area.hidden = false;
+      area.focus();
+      area.select();
+      status.textContent = "Le message est juste en dessous : copie-le et envoie-le à HAM.";
+    };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(area.value).then(ok, fallback);
+      else fallback();
+    } catch(e) { fallback(); }
+  });
+
+  function confetti(){
+    if (reduceMotion) return;
+    var em = ["♥","❥","✦","❦","♥"];
+    for (var i = 0; i < 44; i++) {
+      var c = document.createElement("div");
+      c.className = "confetti";
+      c.textContent = em[Math.floor(Math.random() * em.length)];
+      c.style.left = Math.random() * 100 + "vw";
+      c.style.color = Math.random() > .5 ? "#6e1f3a" : "#c9a24b";
+      c.style.animationDuration = (2.5 + Math.random() * 2) + "s";
+      c.style.animationDelay = (Math.random() * .6) + "s";
+      document.body.appendChild(c);
+      (function(el){ setTimeout(function(){ el.remove(); }, 6000); })(c);
+    }
+  }
+})();
+</script>
+</body>
+</html>
